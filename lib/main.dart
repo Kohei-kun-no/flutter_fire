@@ -56,19 +56,26 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
-        ),
+      body: FutureBuilder(
+        future: _user.get(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if(snapshot.hasError) {
+            return const Text("エラーが発生しました");
+          } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
+            return const Text("ドキュメントがありません");
+          } else if (snapshot.connectionState == ConnectionState.done) {
+            List<QueryDocumentSnapshot> docs = snapshot.data!.docs;
+            return ListView(
+              children: docs.map((doc) {
+                Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+                String name = data['name'];
+                return Text(name);
+              }).toList(),
+            );
+          } else {
+            return const CircularProgressIndicator();
+          }
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: addUser,
