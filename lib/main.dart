@@ -40,15 +40,15 @@ class _MyHomePageState extends State<MyHomePage> {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   static final CollectionReference _user = _firestore.collection('user');
 
+  final Stream<QuerySnapshot> _userStream = _user.snapshots();
+
   Future<void> addUser() async {
     await _user.add({
-      'name': 'MINODA',
+      'name': 'MINODA KOHEI',
       'age': '24'
     });
     print('追加完了');
   }
-
-  int _counter = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -56,14 +56,16 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: FutureBuilder(
-        future: _user.get(),
+      body: StreamBuilder(
+        stream: _userStream,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if(snapshot.hasError) {
             return const Text("エラーが発生しました");
           } else if (snapshot.hasData && snapshot.data!.docs.isEmpty) {
             return const Text("ドキュメントがありません");
-          } else if (snapshot.connectionState == ConnectionState.done) {
+          } else if (snapshot.connectionState == ConnectionState.waiting) {
+            return const CircularProgressIndicator();
+          } else {
             List<QueryDocumentSnapshot> docs = snapshot.data!.docs;
             return ListView(
               children: docs.map((doc) {
@@ -72,8 +74,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 return Text(name);
               }).toList(),
             );
-          } else {
-            return const CircularProgressIndicator();
           }
         },
       ),
