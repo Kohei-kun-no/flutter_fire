@@ -37,15 +37,18 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  static final CollectionReference _user = _firestore.collection('user');
+
+  Future<void> addUser() async {
+    await _user.add({
+      'name': 'MINODA',
+      'age': '24'
+    });
+    print('追加完了');
+  }
 
   int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +71,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: addUser,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
